@@ -18,15 +18,15 @@ import {primaryNav} from './navs.mjs'
 
 export const getHomepage = () => {
 
-	// Produce the HTML for the main content area.
-	const view = dom`<main>
-		${primaryNav}
-		...
-	</main>`
+    // Produce the HTML for the main content area.
+    const view = dom`<main>
+        ${primaryNav}
+        ...
+    </main>`
 
-	// Highlight the active page link.
-	const homeLink = view.querySelector('#home-link')
-	homeLink.classList.add('active')
+    // Highlight the active page link.
+    const homeLink = view.querySelector('#home-link')
+    homeLink.classList.add('active')
 }
 ```
 
@@ -40,7 +40,7 @@ Create a virtual DOM fragment as follows:
 import {dom} from '@jeffmcmahan/server-dom'
 
 const fragment = dom`<header>
-	<h2 class="huge">Hello World!</h2>
+    <h2 class="huge">Hello World!</h2>
 </header>`
 ```
 
@@ -60,11 +60,11 @@ It is possible to embed fragments within one another without incurring any redun
 import {dom} from '@jeffmcmahan/server-dom'
 
 const getHeader = () => dom`<h2 class="huge">
-	Hello World!
+    Hello World!
 </h2>`
 
 const fragment = dom`<header>
-	${getHeader()}
+    ${getHeader()}
 </header>`
 ```
 
