@@ -1,0 +1,20 @@
+{
+  "name": "server-dom",
+  "type": "module",
+  "version": "0.0.1",
+  "description": "Simple virtual dom for server-side work",
+  "main": "main.mjs",
+  "scripts": {
+    "test": "node test.mjs"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jeffmcmahan/server-dom.git"
+  },
+  "author": "Jeff McMahan",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/jeffmcmahan/server-dom/issues"
+  },
+  "homepage": "https://github.com/jeffmcmahan/server-dom#readme"
+}
