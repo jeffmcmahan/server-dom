@@ -1,6 +1,8 @@
 import {strict as assert} from 'assert'
 import {dom} from './main.mjs'
 
+// Parsing & Serialization ////////////////////////////////////////////////////
+
 const testVar = String(Math.random())
 
 const fragment = dom`${testVar}
@@ -38,19 +40,32 @@ assert(html.includes('<ul id="embedded">'))
 // Should strip redundant linebreaks.
 assert(!html.includes('\n\n'))
 
-console.log('Parse and serialization tests passing.')
+console.log('Parsing and serialization tests passing.')
 
-////////////
+// Query & Manipulation ///////////////////////////////////////////////////////
 
+// querySelector(tagName)
+assert.equal(fragment.querySelector('div').tagName, 'DIV')
+
+// querySelectorAll(tagName)
+assert.equal(fragment.querySelectorAll('div').length, 1)
+
+// .querySelector(#id)
 assert.equal(fragment.querySelector('#embedded').id, 'embedded')
+
+// classList.contains()
 assert(fragment.querySelector('.bar').classList.contains('bar'))
 
+// classList.add()
 fragment.querySelector('.bar').classList.add('baz')
 assert(fragment.querySelector('.bar').classList.contains('baz'))
 
+// classList.remove()
 fragment.querySelector('.bar').classList.remove('baz')
 assert(!fragment.querySelector('.bar').classList.contains('baz'))
 
-assert.equal(fragment.querySelectorAll('div').length, 1)
+// .remove()
+fragment.querySelector('#embedded').remove()
+assert.equal(fragment.querySelector('#embedded'), null)
 
-console.log('Query and manip tests passing.')
+console.log('Query and manipulation tests passing.')

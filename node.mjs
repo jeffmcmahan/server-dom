@@ -107,6 +107,10 @@ const methods = node => {
 			}
 		},
 		append: (...fragments) => node.childNodes.push(...fragments),
+		remove: () => {
+			const i = node.parent.childNodes.indexOf(node)
+			node.parent.childNodes.splice(i, 1)
+		},
 		querySelector: selector => (query(node, selector)[0] || null),
 		querySelectorAll: selector => query(node, selector),
 		toString: () => toString(node)
