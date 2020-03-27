@@ -60,8 +60,8 @@ const query = (node, selector) => {
 			value = selector.slice(1).trim()
 		}
 		if (selector.startsWith('[')) {
-			attr = selector.split(']')[0].slice(1).trim()
-			value = (selector.split('=').slice(1).trim() || true)
+			[attr, value] = selector.slice(1,-1).split('=')
+			value = (value || '')
 		}
 		if (!attr) {
 			attr = 'tagName'
@@ -106,6 +106,7 @@ const methods = node => {
 					.join(' ')
 			}
 		},
+		append: (...fragments) => node.childNodes.push(...fragments),
 		querySelector: selector => (query(node, selector)[0] || null),
 		querySelectorAll: selector => query(node, selector),
 		toString: () => toString(node)

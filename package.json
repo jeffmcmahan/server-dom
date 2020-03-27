@@ -1,7 +1,7 @@
 {
-  "name": "server-dom",
+  "name": "@jeffmcmahan/server-dom",
   "type": "module",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "Simple virtual dom for server-side work",
   "main": "main.mjs",
   "scripts": {
@@ -16,5 +16,6 @@
   "bugs": {
     "url": "https://github.com/jeffmcmahan/server-dom/issues"
   },
+  "private": false,
   "homepage": "https://github.com/jeffmcmahan/server-dom#readme"
 }
