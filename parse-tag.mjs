@@ -42,7 +42,9 @@ const parseOpeningTag = state => {
 			continue
 		}
 		parseAttribute(state)
-		state.pos++
+		if (state.peek() != '>') {
+			state.pos++
+		}
 	}
 	state.pos++ // step past final ">"
 }
