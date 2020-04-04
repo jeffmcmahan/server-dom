@@ -62,6 +62,28 @@ const parseClosingTag = state => {
 	return true
 }
 
+const consume = (state, tagName) => {
+
+	/// Consume the content until encountering an unescaped closing
+	/// tag (script or style).
+
+	tagName = tagName.toLowerCase()
+	const closingTag = `</${tagName}>`
+	const ln = closingTag.length
+	const onset = state.pos
+	const node = createNode(state)
+	node.tagName = 'TEXTNODE'
+	state.hostNode.childNodes.push(node)
+
+	while (!state.end() && state.peek(ln) !== closingTag) {
+		state.pos++
+	}
+	node.text = state.src.slice(onset, state.pos)
+	if (state.end()) {
+		throw new Error(`Unclosed <${tagName}> element.`)
+	}
+}
+
 export const parseTag = state => {
 
 	/// Parses an element into a new AST node.
@@ -93,8 +115,16 @@ export const parseTag = state => {
 
 	let lastPos = state.pos
 	while (!parseClosingTag(state)) {
-		parseTextNode(state)
+
 		parseComment(state)
+
+		// Handle scripts and styles without recursion.
+		if ('SCRIPT|STYLE'.includes(node.tagName)) {
+			consume(state, node.tagName)
+		}
+
+		parseTextNode(state)
+		
 		parseTag(state)
 		if (state.pos === lastPos) {
 			const openNode = node.childNodes.slice(-1).pop()

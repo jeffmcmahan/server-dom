@@ -20,29 +20,6 @@ const printAttrs = node => {
 	return attrs.join(' ')
 }
 
-const toString = node => {
-
-	/// Prints a DOM node as a string.
-	/// => string
-
-	if (node.tagName == 'TEXTNODE') {
-		return node.text
-	}
-	if (node.tagName == 'FRAGMENT') {
-		return node.childNodes.map(node => node.toString()).join('')
-	}
-	const opening = [
-		node.tagName.toLowerCase(),
-		printAttrs(node)
-	].filter(s => s).join(' ')
-	const closing = emptyTags.includes(node.tagName) 
-		? '' 
-		: `</${node.tagName.toLowerCase()}>`
-	return `<${opening}>` +
-		node.childNodes.map(node => node.toString()).join('') +
-	closing
-}
-
 const query = (node, selector) => {
 
 	///
@@ -84,50 +61,81 @@ const query = (node, selector) => {
 	return results
 }
 
-const methods = node => {
+class AstNode {
 
-	/// Adds a browser-like interface to the node object.
-	/// => Object
+	/// Using a class construct simply for performance gain.
+	/// ... saves 80% vs. return public pattern.
 
-	return {
-		classList: {
-			contains: str => {
-				return (node.className || '').split(' ').includes(str)
-			},
-			add: str => {
-				if (!node.classList.contains(str)) {
-					node.className = ((node.className || '') + ' ' + str).trim()
-				}
-			},
-			remove: str => {
-				node.className = node.className
-					.split(' ')
-					.filter(s => s !== str)
-					.join(' ')
-			}
-		},
-		append: (...fragments) => node.childNodes.push(...fragments),
-		remove: () => {
-			const i = node.parent.childNodes.indexOf(node)
-			node.parent.childNodes.splice(i, 1)
-		},
-		querySelector: selector => (query(node, selector)[0] || null),
-		querySelectorAll: selector => query(node, selector),
-		toString: () => toString(node)
+	isDom = true
+
+	constructor (pos) {
+		this.onset = pos
+		this.tagName = ''
+		this.text = ''
+		this.childNodes = []
+		this.classList = {
+			add: this.addClass.bind(this),
+			contains: this.containsClass.bind(this),
+			remove: this.removeClass.bind(this)
+		}
+	}
+
+	containsClass(str) {
+		return (this.className || '').split(' ').includes(str)
+	}
+	
+	addClass(str) {
+		if (!this.classList.contains(str)) {
+			this.className = ((this.className || '') + ' ' + str).trim()
+		}
+	}
+
+	removeClass(str) {
+		this.className = this.className
+			.split(' ')
+			.filter(s => s !== str)
+			.join(' ')
+	}
+
+	append(...fragments) {
+		this.childNodes.push(...fragments)
+	}
+
+	remove() {
+		const i = this.parent.childNodes.indexOf(this)
+		this.parent.childNodes.splice(i, 1)
+	}
+
+	querySelector(selector) {
+		return (query(this, selector)[0] || null)
+	}
+
+	querySelectorAll(selector) {
+		return query(this, selector)
+	}
+
+	toString() {
+
+		/// Prints a DOM node as a string.
+		/// => string
+	
+		if (this.tagName == 'TEXTNODE') {
+			return this.text
+		}
+		if (this.tagName == 'FRAGMENT') {
+			return this.childNodes.map(node => node.toString()).join('')
+		}
+		const opening = [
+			this.tagName.toLowerCase(),
+			printAttrs(this)
+		].filter(s => s).join(' ')
+		const closing = emptyTags.includes(this.tagName) 
+			? '' 
+			: `</${this.tagName.toLowerCase()}>`
+		return `<${opening}>` +
+			this.childNodes.map(node => node.toString()).join('') +
+		closing
 	}
 }
 
-export const createNode = state => {
-
-	/// Creates a new DOM node.
-	/// => Object
-
-	const node = {
-		onset: state.pos,
-		tagName: '',
-		text: '',
-		childNodes: []
-	}
-	Object.assign(node, methods(node))
-	return node
-}
+export const createNode = state => new AstNode(state.pos)

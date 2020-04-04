@@ -1,6 +1,8 @@
 import {strict as assert} from 'assert'
 import {dom} from './main.mjs'
 
+console.time('tests')
+
 // Parsing & Serialization ////////////////////////////////////////////////////
 
 const testVar = String(Math.random())
@@ -40,8 +42,6 @@ assert(html.includes('<ul id="embedded">'))
 // Should strip redundant linebreaks.
 assert(!html.includes('\n\n'))
 
-console.log('Parsing and serialization tests passing.')
-
 // Query & Manipulation ///////////////////////////////////////////////////////
 
 // querySelector(tagName)
@@ -68,4 +68,4 @@ assert(!fragment.querySelector('.bar').classList.contains('baz'))
 fragment.querySelector('#embedded').remove()
 assert.equal(fragment.querySelector('#embedded'), null)
 
-console.log('Query and manipulation tests passing.')
+console.timeEnd('tests')
