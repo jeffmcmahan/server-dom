@@ -1,15 +1,16 @@
+const nameOffset = '= \t\n\r>'
+
 export const parseAttribute = state => {
 
 	/// Parses an element's attributes into an Object.
 	/// => undefined
 
-	if (state.end() || /\s/.test(state.peek())) {
+	if (/\s/.test(state.peek())) {
 		return
 	}
 
 	const onset = state.pos
-	const nameOffset = /[=\s\n>]/
-	while (!state.end() && !nameOffset.test(state.peek())) {
+	while (!nameOffset.includes(state.peek())) {
 		state.pos++
 	}
 	const attrName = state.src.slice(onset, state.pos)
@@ -25,9 +26,7 @@ export const parseAttribute = state => {
 			state.pos++ // step post opening double quote.
 		}
 		const valueOnset = state.pos
-		while (!state.end() && state.peek() !== '"') {
-			state.pos++
-		}
+		state.pos = state.src.indexOf('"', state.pos)
 		if (state.peek() !== '"') {
 			throw new Error(
 				`Invalid ${attrName} attribute at ${onset} (double quotes are required).`

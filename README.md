@@ -32,6 +32,12 @@ export const getHomepage = () => {
 
 Why is that better? Because here I can manipulate the state of the page without knowing anything about where it came from; I don't have to change the code that generates the core stuff in the document in order to make such changes as are needed.
 
+### Why not jsdom or cheerio?
+
+First, performance: jsdom is huge and rather slow. Cheerio is 5–10 times faster. With its single-pass parser, server-dom is 5-7 times faster than Cheerio. As a basic benchmark, I took the HTML source of the cheerio project page at npm (425KB with 10,700 nodes), and after some warmup, just passed the HTML string to cheerio and to server-dom. Times were ≈150ms and ≈25ms respectively.
+
+Second, jsdom installs about 100 npm packages. Cheerio installs (at last look) about 20. And server-dom has no dependencies.
+
 ## Example 1: Basic
 
 Create a virtual DOM fragment as follows:

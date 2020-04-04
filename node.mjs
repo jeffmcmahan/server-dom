@@ -22,8 +22,21 @@ const printAttrs = node => {
 
 const query = (node, selector) => {
 
-	///
-	/// => Array
+	/// Executes the given query on the DOM.
+	/// => Array<AstNode>
+
+	// Should we index classes and ids during parse?
+	// That would make this massively faster.
+
+	// • h1
+	// • #foo-id
+	// • .foo-class
+	// h1.foo-class
+	// h2#foo-id
+	// {el}?[attr]
+	// {el}?[attr=value]
+	// {sel} {sel}
+	// {sel}>{sel}
 	
 	if (typeof selector === 'string') {
 		let attr = ''
@@ -61,49 +74,49 @@ const query = (node, selector) => {
 	return results
 }
 
+const addClass = function (str) {
+	if (!this.classList.contains(str)) {
+		this.className = ((this.className || '') + ' ' + str).trim()
+	}
+}
+
+const hasClass = function (str) {
+	return (this.className || '').split(' ').includes(str)
+}
+
+const removeClass = function (str) {
+	this.className = this.className
+		.split(' ')
+		.filter(s => s !== str)
+		.join(' ')
+}
+
 class AstNode {
 
-	/// Using a class construct simply for performance gain.
-	/// ... saves 80% vs. return public pattern.
-
-	isDom = true
+	/// A basic implementation of the core DOM node capabilities.
 
 	constructor (pos) {
 		this.onset = pos
 		this.tagName = ''
-		this.text = ''
+		this.text = '' // Only populated for text nodes.
 		this.childNodes = []
 		this.classList = {
-			add: this.addClass.bind(this),
-			contains: this.containsClass.bind(this),
-			remove: this.removeClass.bind(this)
+			add: addClass.bind(this),
+			contains: hasClass.bind(this),
+			remove: removeClass.bind(this)
 		}
-	}
-
-	containsClass(str) {
-		return (this.className || '').split(' ').includes(str)
-	}
-	
-	addClass(str) {
-		if (!this.classList.contains(str)) {
-			this.className = ((this.className || '') + ' ' + str).trim()
-		}
-	}
-
-	removeClass(str) {
-		this.className = this.className
-			.split(' ')
-			.filter(s => s !== str)
-			.join(' ')
 	}
 
 	append(...fragments) {
 		this.childNodes.push(...fragments)
 	}
 
-	remove() {
-		const i = this.parent.childNodes.indexOf(this)
-		this.parent.childNodes.splice(i, 1)
+	insertBefore(node, refNode) {
+		if (!(node instanceof AstNode) || !(refNode instanceof AstNode)) {
+			throw new Error('insertBefore() requires two AstNodes.')
+		}
+		const pos = this.childNodes.indexOf(refNode)
+		this.childNodes.splice(pos, 0, node)
 	}
 
 	querySelector(selector) {
@@ -112,6 +125,11 @@ class AstNode {
 
 	querySelectorAll(selector) {
 		return query(this, selector)
+	}
+
+	remove() {
+		const i = this.parent.childNodes.indexOf(this)
+		this.parent.childNodes.splice(i, 1)
 	}
 
 	toString() {

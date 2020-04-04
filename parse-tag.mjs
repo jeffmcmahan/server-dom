@@ -8,6 +8,7 @@ export const emptyTags = [
 	'BASE',
 	'BR',
 	'COL',
+	'!DOCTYPE',
 	'EMBED',
 	'HR',
 	'IMG',
@@ -42,13 +43,12 @@ const parseOpeningTag = state => {
 			continue
 		}
 		parseAttribute(state)
-		if (state.peek() != '>') {
+		if (state.peek() !== '>') {
 			state.pos++
 		}
 	}
 	state.pos++ // step past final ">"
 }
-
 
 const parseClosingTag = state => {
 
@@ -69,15 +69,13 @@ const consume = (state, tagName) => {
 
 	tagName = tagName.toLowerCase()
 	const closingTag = `</${tagName}>`
-	const ln = closingTag.length
 	const onset = state.pos
 	const node = createNode(state)
 	node.tagName = 'TEXTNODE'
 	state.hostNode.childNodes.push(node)
 
-	while (!state.end() && state.peek(ln) !== closingTag) {
-		state.pos++
-	}
+	const closePos = state.src.indexOf(closingTag, state.pos)
+	state.pos = closePos
 	node.text = state.src.slice(onset, state.pos)
 	if (state.end()) {
 		throw new Error(`Unclosed <${tagName}> element.`)
@@ -90,7 +88,7 @@ export const parseTag = state => {
 	/// => undefined
 
 	const next2 = state.peek(2)
-	if (state.end() || !tagOnset.test(next2)) {
+	if (!tagOnset.test(next2)) {
 		return
 	}
 
@@ -100,8 +98,6 @@ export const parseTag = state => {
 	state.hostNode = node
 	parseOpeningTag(state)
 
-	// If empty, just stop here.
-	// But how do we warn?
 	if (emptyTags.includes(state.hostNode.tagName)) {
 		if (node.tagName == 'EMBEDDED-FRAGMENT') {
 			const fragment = state.embeddedFragments[node.uid]
