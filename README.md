@@ -96,4 +96,4 @@ jsdom installs ≈100 packages and cheerio installs ≈20. Server-dom has zero d
 
 #### Requirements
 
-Both cheerio and jsdom are aiming at creating something far more like the real DOM environment that is required for server-side document generation and manipulation for purposes of producing good quality, valid HTML output. Scraping is altogether more demanding, and not something server-dom aims to handle. 
+Both cheerio and jsdom are aiming at creating something far more like the real DOM environment than is required for server-side document generation and manipulation for purposes of producing good quality, valid HTML output. Scraping is altogether more demanding, and not something server-dom aims to handle. 
