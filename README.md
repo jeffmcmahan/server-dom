@@ -2,79 +2,98 @@
 
 Create mutable DOM on the server-side for flexible imperative manipulation.
 
-```
+```sh
 npm install @jeffmcmahan/server-dom
 ```
 
-## Why? 
-
-The age-old paradigm of getting all content and state together before producing any HTML is a result of the fact that once a bit of HTML is produced it cannot be edited without parsing. For example: `<div class="foo">...</div>` ... revisiting that markup to add new content or new attributes is not doable *cleanly* by string manipulation. This encourages a template-driven workflow, where we accumulate state and dump it into a template at the end.
-
-It's often much better to do things like this:
+server-dom makes it easy to do things like this:
 
 ```js
-import {dom} from '@jeffmcmahan/server-dom'
-import {primaryNav} from './navs.mjs'
+const view = dom`<body><header>${primaryNav}</header> ...`
 
-export const getHomepage = () => {
-
-    // Produce the HTML for the main content area.
-    const view = dom`<main>
-        ${primaryNav}
-        ...
-    </main>`
-
-    // Highlight the active page link.
-    const homeLink = view.querySelector('#home-link')
-    homeLink.classList.add('active')
-}
+view.querySelector('#home-link').classList.add('active')
 ```
 
-Why is that better? Because here I can manipulate the state of the page without knowing anything about where it came from; I don't have to change the code that generates the core stuff in the document in order to make such changes as are needed.
-
-### Why not jsdom or cheerio?
-
-First, performance: jsdom is huge and rather slow. Cheerio is 5–10 times faster. With its single-pass parser, server-dom is 5-7 times faster than Cheerio. As a basic benchmark, I took the HTML source of the cheerio project page at npm (425KB with 10,700 nodes), and after some warmup, just passed the HTML string to cheerio and to server-dom. Times were ≈150ms and ≈25ms respectively.
-
-Second, jsdom installs about 100 npm packages. Cheerio installs (at last look) about 20. And server-dom has no dependencies.
-
-## Example 1: Basic
+## Example
 
 Create a virtual DOM fragment as follows:
 
 ```js
 import {dom} from '@jeffmcmahan/server-dom'
 
-const fragment = dom`<header>
-    <h2 class="huge">Hello World!</h2>
-</header>`
+const fragment = dom`<h1 class="title">Hello World!</h1>`
 ```
 
-You can imperatively interact with the DOM using a limited browser-compatible API:
+Interact with the DOM using a browser-compatible API:
 
 ```js
-fragment.querySelector('header').classList.add('blue')
+fragment.querySelector('.title').classList.add('blue')
 
-console.log(fragment.toString()) // <header class="blue">...
+console.log(fragment.outerHTML) // <h1 class="blue">He...
 ```
 
-## Example 2: Nesting
+## Properties & Methods
 
-It is possible to embed fragments within one another without incurring any redundant parsing overhead (because the trees are not reduced to strings). As shown here:
+server-dom's core `AstNode` class implements a near-equivalent for all relevant DOM `Node` properties and methods. DOM `NodeList` and `DOMString` types are just native javascript equivalents.
 
-```js
-import {dom} from '@jeffmcmahan/server-dom'
+### Properties
 
-const getHeader = () => dom`<h2 class="huge">
-    Hello World!
-</h2>`
+- `childNodes`
+- `classList`
+- `className`
+- `firstChild`
+- `id`
+- `isConnected`
+- `lastChild`
+- `nextSibling`
+- `nodeName`
+- `nodeType`
+- `ownerDocument` (resolves to parent `<html>` node, if any)
+- `parent`
+- `previousSibling`
+- `value` (only defined for text nodes)
 
-const fragment = dom`<header>
-    ${getHeader()}
-</header>`
-```
+In general, attributes will remain `undefined` unless and until they are either specified in HTML or added by assignment.
 
-## Caveats
+### Methods
 
-- No support for many browser API conveniences like `innerHTML` or `innerText`.
-- Only valid XML is permitted; bad code won't work (not suitable for scraping).
+- `append(node)`
+- `classList.add(className)`
+- `classList.contains(className)`
+- `classList.remove(className)`
+- `cloneNode([deep])`
+- `insertBefore(node, referenceNode)`
+- `querySelector(selector)`†
+- `querySelectorAll(selector)`†
+- `remove()`
+- `removeChild(node)`
+
+† Selector support is currently limited to single tag names, ids, class names, and attributes; no descendants or other combinations (yet).
+
+### Additions to `Node` API:
+
+The DOM `Node` API does not provide for serialization to HTML, so these items have been added, using `HTMLElement` naming conventions:
+
+- `innerHTML`
+- `outerHTML`
+
+### Why not jsdom or cheerio?
+
+#### Performance
+
+jsdom is huge and slow; cheerio is advertised to be 8 times faster. With its single-pass parser, server-dom is 5–7 times faster than cheerio.
+
+As a basic benchmark, I took the massive HTML source of the cheerio project page at npm (425kb and ≈11,000 nodes) and after some warmup, I pass the HTML string to cheerio and to server-dom. I don't think statistical treatment is required to appreciate the difference:
+
+| Project    | Time   |
+| ---        | ---    |
+| cheerio    | ≈150ms |
+| server-dom | ≈25ms  |
+
+#### Dependencies
+
+jsdom installs ≈100 packages and cheerio installs ≈20. Server-dom has zero dependencies.
+
+#### Requirements
+
+Both cheerio and jsdom are aiming at creating something far more like the real DOM environment that is required for server-side document generation and manipulation for purposes of producing good quality, valid HTML output. Scraping is altogether more demanding, and not something server-dom aims to handle. 

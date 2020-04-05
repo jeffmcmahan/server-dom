@@ -11,7 +11,8 @@ export const parseTextNode = state => {
 
 	const node = createNode(state)
 	const onset = state.pos
-	node.tagName = 'TEXTNODE'
+	node.nodeName = 'TEXTNODE'
+	node.parent = state.hostNode
 	state.hostNode.childNodes.push(node)
 
 	const offset = state.src.indexOf('<', state.pos)
@@ -20,5 +21,5 @@ export const parseTextNode = state => {
 	} else {
 		state.pos = state.src.length
 	}
-	node.text = state.src.slice(onset, state.pos)
+	node.value = state.src.slice(onset, state.pos)
 }

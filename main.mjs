@@ -12,7 +12,7 @@ const parseDoctype = state => {
 
 	if (/^<!doctype/i.test(state.src)) {
 		const node = createNode(state)
-		node.tagName = '!DOCTYPE'
+		node.nodeName = '!DOCTYPE'
 		node.parent = state.hostNode
 		state.hostNode.childNodes.push(node)
 		state.hostNode = node
@@ -46,7 +46,7 @@ const parse = (src, embeddedFragments) => {
 	}
 
 	state.ast = createNode(state)
-	state.ast.tagName = 'FRAGMENT'
+	state.ast.nodeName = 'FRAGMENT'
 	state.hostNode = state.ast
 
 	parseDoctype(state)

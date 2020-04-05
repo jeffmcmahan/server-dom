@@ -18,7 +18,7 @@ const fragment = dom`${testVar}
 	</div>
 </html>${testVar}`
 
-const html = fragment.toString()
+const html = fragment.outerHTML
 
 // Comment should be gone.
 assert(!html.includes('<!--'))
@@ -54,10 +54,10 @@ assert(!html.includes('\n\n'))
 
 // Query & Manipulation ///////////////////////////////////////////////////////
 
-// querySelector(tagName)
-assert.equal(fragment.querySelector('div').tagName, 'DIV')
+// querySelector(nodeName)
+assert.equal(fragment.querySelector('div').nodeName, 'DIV')
 
-// querySelectorAll(tagName)
+// querySelectorAll(nodeName)
 assert.equal(fragment.querySelectorAll('div').length, 1)
 
 // .querySelector(#id)

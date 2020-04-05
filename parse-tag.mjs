@@ -35,8 +35,8 @@ const parseOpeningTag = state => {
 	while (!state.end() && !nameOffset.test(state.peek())) {
 		state.pos++
 	}
-	const tagName = state.src.slice(onset + 1, state.pos)
-	state.hostNode.tagName = tagName.toUpperCase()
+	const nodeName = state.src.slice(onset + 1, state.pos)
+	state.hostNode.nodeName = nodeName.toUpperCase()
 	while (!state.end() && state.peek() !== '>') {
 		if (state.peek(2) === '/>') {
 			state.pos++
@@ -58,27 +58,27 @@ const parseClosingTag = state => {
 	if (state.end() || state.peek(2) !== '</') {
 		return false
 	}
-	state.pos += (state.hostNode.tagName.length + 3)
+	state.pos += (state.hostNode.nodeName.length + 3)
 	return true
 }
 
-const consume = (state, tagName) => {
+const consume = (state, nodeName) => {
 
 	/// Consume the content until encountering an unescaped closing
 	/// tag (script or style).
 
-	tagName = tagName.toLowerCase()
-	const closingTag = `</${tagName}>`
+	nodeName = nodeName.toLowerCase()
+	const closingTag = `</${nodeName}>`
 	const onset = state.pos
 	const node = createNode(state)
-	node.tagName = 'TEXTNODE'
+	node.nodeName = 'TEXTNODE'
 	state.hostNode.childNodes.push(node)
 
 	const closePos = state.src.indexOf(closingTag, state.pos)
 	state.pos = closePos
-	node.text = state.src.slice(onset, state.pos)
+	node.value = state.src.slice(onset, state.pos)
 	if (state.end()) {
-		throw new Error(`Unclosed <${tagName}> element.`)
+		throw new Error(`Unclosed <${nodeName}> element.`)
 	}
 }
 
@@ -98,8 +98,8 @@ export const parseTag = state => {
 	state.hostNode = node
 	parseOpeningTag(state)
 
-	if (emptyTags.includes(state.hostNode.tagName)) {
-		if (node.tagName == 'EMBEDDED-FRAGMENT') {
+	if (emptyTags.includes(state.hostNode.nodeName)) {
+		if (node.nodeName == 'EMBEDDED-FRAGMENT') {
 			const fragment = state.embeddedFragments[node.uid]
 			fragment.parent = node
 			node.parent.childNodes.pop()
@@ -115,8 +115,8 @@ export const parseTag = state => {
 		parseComment(state)
 
 		// Handle scripts and styles without recursion.
-		if ('SCRIPT|STYLE'.includes(node.tagName)) {
-			consume(state, node.tagName)
+		if ('SCRIPT|STYLE'.includes(node.nodeName)) {
+			consume(state, node.nodeName)
 		}
 
 		parseTextNode(state)
@@ -124,7 +124,7 @@ export const parseTag = state => {
 		parseTag(state)
 		if (state.pos === lastPos) {
 			const openNode = node.childNodes.slice(-1).pop()
-			const unclosedTag = openNode.tagName.toLowerCase()
+			const unclosedTag = openNode.nodeName.toLowerCase()
 			const pos = openNode.onset
 			throw new Error(
 				`Invalid HTML: unclosed <${unclosedTag}> at char ${pos}.`
