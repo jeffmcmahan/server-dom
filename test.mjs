@@ -7,7 +7,8 @@ console.time('tests')
 
 const testVar = String(0.5938800190254814)
 
-const fragment = dom`${testVar}
+const fragment = dom`<!doctype html>
+	${testVar}
 	<html>
 	<div>
 		<!-- foo -->
@@ -26,13 +27,13 @@ assert(!html.includes('-->'))
 assert(!html.includes(' foo '))
 
 // General parsing check.
+assert(html.includes('<!doctype html>'))
 assert(html.includes('</div>'))
 assert(html.includes('<i class="bar">'))
 assert(html.includes('</i>'))
 assert(html.includes('<link rel="stylesheet" href="/baz.css">'))
 
 // Variables should be printed.
-assert(html.startsWith(testVar))
 assert(html.endsWith(testVar))
 assert(html.includes('<div>'))
 
@@ -47,7 +48,7 @@ assert(dom`<div><style>...this just eaten...</style></div>`)
 
 // <!doctype html>
 const doctype = dom`<!doctype html><html></html>`
-assert(doctype.childNodes[0].html == true)
+assert(doctype.childNodes[0].html == 'true')
 
 // Should strip redundant linebreaks.
 assert(!html.includes('\n\n'))

@@ -10,7 +10,7 @@ const parseDoctype = state => {
 	/// Handles a leading <!doctype ...> declaration.
 	/// => undefined
 
-	if (/^<!doctype/i.test(state.src)) {
+	if (/^<!doctype[\s>]/i.test(state.src)) {
 		const node = createNode(state)
 		node.nodeName = '!DOCTYPE'
 		node.parent = state.hostNode

@@ -14,7 +14,7 @@ export const parseAttribute = state => {
 		state.pos++
 	}
 	const attrName = state.src.slice(onset, state.pos)
-	state.hostNode[attrName] = true
+	state.hostNode[attrName] = 'true'
 	
 	if (state.peek() === '=') {
 		state.pos++ // step past: =
@@ -34,6 +34,7 @@ export const parseAttribute = state => {
 		}
 		const attrValue = state.src.slice(valueOnset, state.pos)
 		if (attrName === 'class') {
+			delete state.hostNode.class
 			state.hostNode.className = attrValue
 		} else {
 			state.hostNode[attrName] = attrValue

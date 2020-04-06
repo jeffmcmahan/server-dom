@@ -7,13 +7,16 @@ const printAttrs = node => {
 
 	const attrs = []
 	Object.keys(node).forEach(attr => {
-		const isString = (typeof node[attr] === 'string')
+		const val = node[attr]
+		const isString = (typeof val === 'string')
 		const isAttrName = (isString && !('nodeName value').includes(attr))
-		if (isAttrName && node[attr]) {
+		if (isAttrName && val) {
 			if (attr === 'className') {
-				attrs.push(`class="${node[attr]}"`)
+				attrs.push(`class="${val}"`)
+			} else if (val === 'true') {
+				attrs.push(attr)
 			} else {
-				attrs.push(`${attr}="${node[attr]}"`)
+				attrs.push(`${attr}="${val}"`)
 			}
 		}
 	})
