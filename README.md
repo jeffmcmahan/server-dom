@@ -51,7 +51,7 @@ server-dom's core `AstNode` class implements a near-equivalent for all relevant 
 - `ownerDocument` (resolves to parent `<html>` node, if any)
 - `parent`
 - `previousSibling`
-- `value` (only defined for text nodes)
+- `nodeValue` (only defined for text nodes)
 
 In general, attributes will remain `undefined` unless and until they are either specified in HTML or added by assignment.
 
