@@ -76,7 +76,7 @@ const consume = (state, nodeName) => {
 
 	const closePos = state.src.indexOf(closingTag, state.pos)
 	state.pos = closePos
-	node.value = state.src.slice(onset, state.pos)
+	node.nodeValue = state.src.slice(onset, state.pos)
 	if (state.end()) {
 		throw new Error(`Unclosed <${nodeName}> element.`)
 	}

@@ -21,5 +21,5 @@ export const parseTextNode = state => {
 	} else {
 		state.pos = state.src.length
 	}
-	node.value = state.src.slice(onset, state.pos)
+	node.nodeValue = state.src.slice(onset, state.pos)
 }

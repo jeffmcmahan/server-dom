@@ -9,7 +9,7 @@ const printAttrs = node => {
 	Object.keys(node).forEach(attr => {
 		const val = node[attr]
 		const isString = (typeof val === 'string')
-		const isAttrName = (isString && !('nodeName value').includes(attr))
+		const isAttrName = (isString && !('nodeName nodeValue').includes(attr))
 		if (isAttrName && val) {
 			if (attr === 'className') {
 				attrs.push(`class="${val}"`)
@@ -134,7 +134,7 @@ class AstNode {
 		this.className = ''
 		this.parent = null 		// AstNode
 		this.nodeName = ''
-		this.value = '' 		// Only populated for TEXTNODE nodes.
+		this.nodeValue = '' 		// Only populated for TEXTNODE nodes.
 		this.childNodes = []
 		this.classList = {
 			add: addClass.bind(this),
@@ -148,13 +148,16 @@ class AstNode {
 		/// Adds the given dom fragments to the end of childNodes.
 		/// => undefined
 
-		if (fragments.some((node, i) => node.constructor !== AstNode)) {
-			throw new TypeError(
-				`Failed to execute \'append\': `+
-				`parameter ${i} is not of type \'Node\'.`
-			)
-		}
-		this.childNodes.push(...fragments)
+		fragments.forEach(frag => {
+			if (typeof frag === 'string') {
+				const textNode = new AstNode(0)
+				textNode.nodeName = 'TEXTNODE'
+				textNode.nodeValue = frag
+				this.childNodes.push(textNode)
+			} else {
+				this.childNodes.push(frag)
+			}
+		})
 	}
 
 	cloneNode(deep = false) {
@@ -163,9 +166,10 @@ class AstNode {
 		/// => AstNode
 
 		const clone = new AstNode(0)
-		Object.assign(clone, {...this, childNodes: []})
+		const classList = clone.classList
+		Object.assign(clone, {...this, classList, childNodes: []})
 		if (deep) {
-			clone.childNodes = this.childNodes.map(node => node.clone(true))
+			clone.childNodes = this.childNodes.map(node => node.cloneNode(true))
 		}
 		return clone
 	}
@@ -305,7 +309,7 @@ class AstNode {
 		/// => string
 	
 		if (this.nodeName == 'TEXTNODE') {
-			return this.value
+			return this.nodeValue
 		}
 		if (this.nodeName == 'FRAGMENT') {
 			return this.childNodes.map(node => node.outerHTML).join('')
@@ -349,7 +353,7 @@ class AstNode {
 		/// => AstNode?
 
 		this.childNodes.reduce((txt, node) => (
-			txt + node.value || node.textContent
+			txt + (node.nodeValue || node.textContent)
 		), '')
 	}
 }
