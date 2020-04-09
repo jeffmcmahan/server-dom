@@ -29,7 +29,7 @@ Interact with the DOM using a browser-compatible API:
 ```js
 fragment.querySelector('.title').classList.add('blue')
 
-console.log(fragment.outerHTML) // <h1 class="blue">He...
+console.log(fragment.outerHTML) // <h1 class="title blue">He...
 ```
 
 ## Properties & Methods
