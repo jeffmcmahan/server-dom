@@ -71,7 +71,7 @@ const serialize = (value, embeddedFragments) => {
 		return `<embedded-fragment uid="${uid}">`
 	}
 	if (value.constructor === Array) {
-		return value.map(v => serialize(v)).join('')
+		return value.map(v => serialize(v, embeddedFragments)).join('')
 	}
 	return value.toString()
 }
