@@ -115,7 +115,7 @@ export const parseTag = state => {
 		parseComment(state)
 
 		// Handle scripts and styles without recursion.
-		if ('SCRIPT|STYLE'.includes(node.nodeName)) {
+		if (['SCRIPT','STYLE'].includes(node.nodeName)) {
 			consume(state, node.nodeName)
 		}
 
