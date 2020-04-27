@@ -21,6 +21,8 @@ const fragment = dom`<!doctype html>
 
 const html = fragment.outerHTML
 
+console.log(html)
+
 // Comment should be gone.
 assert(!html.includes('<!--'))
 assert(!html.includes('-->'))

@@ -22,9 +22,9 @@ export const parseAttribute = state => {
 			throw new Error(
 				`Invalid ${attrName} attribute at ${state.pos} (double quotes are required).`
 			)
-		} else {
-			state.pos++ // step post opening double quote.
 		}
+		state.pos++ // step post opening double quote.
+
 		const valueOnset = state.pos
 		state.pos = state.src.indexOf('"', state.pos)
 		if (state.peek() !== '"') {
@@ -34,7 +34,6 @@ export const parseAttribute = state => {
 		}
 		const attrValue = state.src.slice(valueOnset, state.pos)
 		if (attrName === 'class') {
-			delete state.hostNode.class
 			state.hostNode.className = attrValue
 		} else {
 			state.hostNode[attrName] = attrValue

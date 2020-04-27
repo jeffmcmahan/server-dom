@@ -1,5 +1,7 @@
 import {emptyTags} from './parse-tag.mjs'
 
+const nonAttrs = ['nodeName', 'nodeValue', '_closed', 'class']
+
 const printAttrs = node => {
 
 	/// Prints a set of attributes as a string.
@@ -9,7 +11,7 @@ const printAttrs = node => {
 	Object.keys(node).forEach(attr => {
 		const val = node[attr]
 		const isString = (typeof val === 'string')
-		const isAttrName = (isString && !('nodeName nodeValue').includes(attr))
+		const isAttrName = (isString && !nonAttrs.includes(attr))
 		if (isAttrName && val) {
 			if (attr === 'className') {
 				attrs.push(`class="${val}"`)

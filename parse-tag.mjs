@@ -3,6 +3,13 @@ import {parseComment} from './parse-comment.mjs'
 import {parseTextNode} from './parse-textnode.mjs'
 import {parseAttribute} from './parse-attribute.mjs'
 
+const syntaxError = (state, node) => {
+	throw new SyntaxError(
+		`Unclosed <${node.nodeName.toLowerCase()}> tag at: `+
+		`${state.src.slice(node.onset, node.onset + 45).replace(/\n/g, '\\n')}...`
+	)
+}
+
 export const emptyTags = [
 	'AREA',
 	'BASE',
@@ -39,8 +46,9 @@ const parseOpeningTag = state => {
 	state.hostNode.nodeName = nodeName.toUpperCase()
 	while (!state.end() && state.peek() !== '>') {
 		if (state.peek(2) === '/>') {
-			state.pos++
-			continue
+			state.hostNode._closed = true
+			state.pos += 2
+			return
 		}
 		parseAttribute(state)
 		if (state.peek() !== '>') {
@@ -50,7 +58,7 @@ const parseOpeningTag = state => {
 	state.pos++ // step past final ">"
 }
 
-const parseClosingTag = state => {
+const parseClosingTag = (node, state) => {
 
 	/// Consumes the closing tag if it exists and returns true if so.
 	/// => boolean
@@ -58,7 +66,14 @@ const parseClosingTag = state => {
 	if (state.end() || state.peek(2) !== '</') {
 		return false
 	}
-	state.pos += (state.hostNode.nodeName.length + 3)
+
+	// The closing tag must match the opening tag.
+	const close = '</' + node.nodeName.toLowerCase() + '>'
+	if (state.end() || state.peek(close.length) !== close) {
+		syntaxError(state, node)
+	}
+	state.pos += (node.nodeName.length + 3)
+	node._closed = true
 	return true
 }
 
@@ -78,7 +93,7 @@ const consume = (state, nodeName) => {
 	state.pos = closePos
 	node.nodeValue = state.src.slice(onset, state.pos)
 	if (state.end()) {
-		throw new Error(`Unclosed <${nodeName}> element.`)
+		syntaxError(state, node)
 	}
 }
 
@@ -98,7 +113,7 @@ export const parseTag = state => {
 	state.hostNode = node
 	parseOpeningTag(state)
 
-	if (emptyTags.includes(state.hostNode.nodeName)) {
+	if (emptyTags.includes(node.nodeName)) {
 		if (node.nodeName == 'EMBEDDED-FRAGMENT') {
 			const fragment = state.embeddedFragments[node.uid]
 			fragment.parent = node
@@ -107,30 +122,28 @@ export const parseTag = state => {
 		}
 		state.hostNode = node.parent
 		return
+	} else if (node._closed) { // <foo/>
+		state.hostNode = node.parent
+		return
 	}
 
+	// Parse the contents of the tag.
 	let lastPos = state.pos
-	while (!parseClosingTag(state)) {
-
-		parseComment(state)
-
-		// Handle scripts and styles without recursion.
+	while (!parseClosingTag(node, state)) {
 		if (['SCRIPT','STYLE'].includes(node.nodeName)) {
 			consume(state, node.nodeName)
 		}
-
+		parseComment(state)
 		parseTextNode(state)
-		
 		parseTag(state)
 		if (state.pos === lastPos) {
-			const openNode = node.childNodes.slice(-1).pop()
-			const unclosedTag = openNode.nodeName.toLowerCase()
-			const pos = openNode.onset
-			throw new Error(
-				`Invalid HTML: unclosed <${unclosedTag}> at char ${pos}.`
-			)
+			break
 		}
 		lastPos = state.pos
+	}
+
+	if (!node._closed) {
+		syntaxError(state, node)
 	}
 	state.hostNode = node.parent
 }

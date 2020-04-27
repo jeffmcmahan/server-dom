@@ -77,9 +77,19 @@ The DOM `Node` API does not provide for serialization to HTML, so these items ha
 - `innerHTML`
 - `outerHTML`
 
-### Why not jsdom or cheerio?
+## SVG Support
 
-#### Performance
+server-dom doesn't know anything about SVG. It will treat it just like any other set of HTML5 elements, with one simple exception: an empty element within an `<svg>` must be explicitly closed with a forward slash before the left angle bracket, as shown:
+
+```html
+<svg>
+	<path d="..." />
+</svg>
+```
+
+## Why not jsdom or cheerio?
+
+### Performance
 
 jsdom is huge and slow; cheerio is advertised to be 8 times faster. With its single-pass parser, server-dom is 5–7 times faster than cheerio.
 
@@ -90,10 +100,10 @@ As a basic benchmark, I took the massive HTML source of the cheerio project page
 | cheerio    | ≈150ms |
 | server-dom | ≈25ms  |
 
-#### Dependencies
+### Dependencies
 
 jsdom installs ≈100 packages and cheerio installs ≈20. Server-dom has zero dependencies.
 
-#### Requirements
+### Requirements
 
-Both cheerio and jsdom are aiming at creating something far more like the real DOM environment than is required for server-side document generation and manipulation for purposes of producing good quality, valid HTML output. Scraping is altogether more demanding, and not something server-dom aims to handle. 
+Both cheerio and jsdom are aiming at creating something far more like the real DOM environment than is required for server-side document generation and manipulation for purposes of producing good quality, valid HTML output. Scraping is altogether more demanding, and not something server-dom aims to handle.
